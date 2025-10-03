@@ -178,7 +178,7 @@ jobs:
         run: |
           echo "Creating backup of staging database..."
           timestamp=$(date +%Y%m%d_%H%M%S)
-          pnpm exec wrangler d1 export next-cf-app --env staging --output "backup_staging_${timestamp}.sql" || echo "Backup failed, continuing..."
+          pnpm exec wrangler d1 export DB --env staging --output "backup_staging_${timestamp}.sql" || echo "Backup failed, continuing..."
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         continue-on-error: true
@@ -186,9 +186,9 @@ jobs:
       - name: Run database migrations (Staging)
         run: |
           echo "Applying database migrations to staging..."
-          pnpm exec wrangler d1 migrations apply next-cf-app --env staging || {
+          pnpm exec wrangler d1 migrations apply DB --env staging || {
             echo "Migration may have failed, checking database state..."
-            pnpm exec wrangler d1 execute next-cf-app --env staging --command="SELECT COUNT(*) as migration_count FROM d1_migrations;" || echo "Migration tracking not available"
+            pnpm exec wrangler d1 execute DB --env staging --command="SELECT COUNT(*) as migration_count FROM d1_migrations;" || echo "Migration tracking not available"
             exit 1
           }
         env:
