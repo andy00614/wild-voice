@@ -82,6 +82,11 @@ export async function createTodoAction(formData: FormData) {
         revalidatePath(todosRoutes.list);
         redirect(todosRoutes.list);
     } catch (error) {
+        // Re-throw Next.js redirect errors without wrapping them
+        if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+            throw error;
+        }
+
         console.error("Error creating todo:", error);
 
         if (
