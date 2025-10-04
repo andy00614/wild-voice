@@ -92,7 +92,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🚀 Preview deployed! Check it out at: https://next-cf-app-preview.effendi-official.workers.dev'
+              body: '🚀 Preview deployed! Check it out at: https://wild-voice-preview.effendi-official.workers.dev'
             })
 
   # Deploy to production (main branch)
