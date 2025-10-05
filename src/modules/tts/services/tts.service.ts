@@ -9,7 +9,7 @@ import { outputsSchema } from "@/modules/outputs/schemas/output.schema";
 import { eq } from "drizzle-orm";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createFal } from "@ai-sdk/fal";
-import { generateSpeech } from "ai";
+import { experimental_generateSpeech as generateSpeech } from "ai";
 import { uploadToR2 } from "@/lib/r2";
 
 interface TTSOptions {
@@ -82,7 +82,7 @@ export async function generateTTSAudio(options: TTSOptions): Promise<TTSResult> 
     });
     const uploadResult = await uploadToR2(audioFile, "tts-outputs");
 
-    if (!uploadResult.success) {
+    if (!uploadResult.success || !uploadResult.url) {
         throw new Error("Failed to upload audio to storage");
     }
 

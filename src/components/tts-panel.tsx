@@ -1,12 +1,12 @@
 "use client";
 
+import { Download, Loader2, Volume2 } from "lucide-react";
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Volume2, Loader2, Download } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { generateTTS } from "@/app/actions/tts";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import type { Voice } from "@/modules/voices/schemas/voice.schema";
 
 interface TTSPanelProps {
@@ -58,8 +58,14 @@ export function TTSPanel({ selectedVoice, onGenerateSuccess }: TTSPanelProps) {
             </div>
 
             <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Your Text</label>
+                <label
+                    htmlFor="tts-textarea"
+                    className="block text-sm font-medium mb-2"
+                >
+                    Your Text
+                </label>
                 <Textarea
+                    id="tts-textarea"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     placeholder="Enter the text you want to convert to speech..."
@@ -74,7 +80,11 @@ export function TTSPanel({ selectedVoice, onGenerateSuccess }: TTSPanelProps) {
                 </span>
             </div>
 
-            <Button onClick={handleGenerate} disabled={isGenerating || !selectedVoice} className="w-full">
+            <Button
+                onClick={handleGenerate}
+                disabled={isGenerating || !selectedVoice}
+                className="w-full"
+            >
                 {isGenerating ? (
                     <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -99,7 +109,8 @@ export function TTSPanel({ selectedVoice, onGenerateSuccess }: TTSPanelProps) {
                                 try {
                                     const response = await fetch(audioUrl);
                                     const blob = await response.blob();
-                                    const url = window.URL.createObjectURL(blob);
+                                    const url =
+                                        window.URL.createObjectURL(blob);
                                     const link = document.createElement("a");
                                     link.href = url;
                                     link.download = `tts-${Date.now()}.mp3`;
@@ -118,7 +129,13 @@ export function TTSPanel({ selectedVoice, onGenerateSuccess }: TTSPanelProps) {
                             Download
                         </Button>
                     </div>
-                    <audio key={audioUrl} controls className="w-full">
+                    {/** biome-ignore lint/a11y/useMediaCaption: <explanation> */}
+                    <audio
+                        key={audioUrl}
+                        controls
+                        className="w-full"
+                        aria-label="Generated speech audio"
+                    >
                         <source src={audioUrl} type="audio/mpeg" />
                         Your browser does not support the audio element.
                     </audio>

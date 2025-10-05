@@ -49,9 +49,9 @@ export function VoiceDashboard({
     };
 
     return (
-        <div className="grid grid-cols-12 gap-4">
-            {/* Left: Voice Library */}
-            <div className="col-span-3">
+        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-12">
+            {/* Voice Library - Mobile: horizontal scroll, Tablet+: sidebar */}
+            <div className="lg:col-span-3">
                 <VoiceLibrary
                     voices={voices}
                     selectedVoiceId={selectedVoiceId}
@@ -59,8 +59,8 @@ export function VoiceDashboard({
                 />
             </div>
 
-            {/* Middle: TTS/STT Panel */}
-            <div className="col-span-6">
+            {/* TTS/STT Panel - Always full width in its context */}
+            <div className="lg:col-span-6">
                 {mode === "tts" ? (
                     <TTSPanel
                         selectedVoice={selectedVoice}
@@ -71,8 +71,8 @@ export function VoiceDashboard({
                 )}
             </div>
 
-            {/* Right: Recent Outputs */}
-            <div className="col-span-3">
+            {/* Recent Outputs - Mobile: collapsible, Tablet+: sidebar */}
+            <div className="lg:col-span-3">
                 <RecentOutputs outputs={outputs} isLoading={isRefreshing} />
             </div>
         </div>

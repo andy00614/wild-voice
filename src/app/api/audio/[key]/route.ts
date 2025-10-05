@@ -3,11 +3,12 @@ import { notFoundResponse } from "@/lib/api-response";
 
 export async function GET(
     request: Request,
-    { params }: { params: { key: string } }
+    { params }: { params: Promise<{ key: string }> }
 ) {
     try {
         const { env } = await getCloudflareContext();
-        const key = decodeURIComponent(params.key);
+        const { key: paramKey } = await params;
+        const key = decodeURIComponent(paramKey);
 
         // 从 R2 获取文件
         const object = await env.FILES.get(key);

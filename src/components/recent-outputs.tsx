@@ -97,7 +97,7 @@ export function RecentOutputs({
     console.log(outputs);
 
     return (
-        <Card className="p-4 flex flex-col h-full">
+        <Card className="p-4 flex flex-col">
             <div className="flex justify-between items-center mb-4 flex-shrink-0">
                 <h2 className="text-lg font-semibold">Recent Outputs</h2>
                 {isLoading && (
@@ -107,7 +107,7 @@ export function RecentOutputs({
 
             <div
                 className="space-y-3 overflow-y-auto flex-1 pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
-                style={{ maxHeight: "500px" }}
+                style={{ maxHeight: "600px" }}
             >
                 {outputs.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">
@@ -147,16 +147,24 @@ export function RecentOutputs({
                                 <div className="space-y-2">
                                     {playingId === output.id ? (
                                         <div className="space-y-2">
-                                            <AudioPlayer
-                                                src={output.audioUrl}
+                                            {/** biome-ignore lint/a11y/useMediaCaption: <explanation> */}
+                                            <audio
+                                                key={output.audioUrl}
+                                                controls
+                                                className="w-full"
                                                 autoPlay
                                                 onEnded={() =>
                                                     setPlayingId(null)
                                                 }
-                                                showJumpControls={false}
-                                                customAdditionalControls={[]}
-                                                layout="horizontal-reverse"
-                                            />
+                                                aria-label={`Audio playback: ${output.inputText || "Generated speech"}`}
+                                            >
+                                                <source
+                                                    src={output.audioUrl}
+                                                    type="audio/mpeg"
+                                                />
+                                                Your browser does not support
+                                                the audio element.
+                                            </audio>
                                             <Button
                                                 size="sm"
                                                 variant="outline"

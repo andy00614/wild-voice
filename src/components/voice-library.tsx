@@ -23,20 +23,21 @@ export function VoiceLibrary({ voices, selectedVoiceId, onVoiceSelect }: VoiceLi
                 </Button>
             </div>
 
-            <div className="space-y-2">
+            {/* Mobile: horizontal scroll, Desktop: vertical list */}
+            <div className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:space-y-2 lg:overflow-x-visible lg:pb-0">
                 {voices.map((voice) => (
                     <div
                         key={voice.id}
                         onClick={() => onVoiceSelect(voice.id)}
-                        className={`p-3 rounded-lg border cursor-pointer ${
+                        className={`p-3 rounded-lg border cursor-pointer flex-shrink-0 w-48 lg:w-auto ${
                             selectedVoiceId === voice.id
                                 ? "bg-accent"
                                 : "hover:bg-accent/50"
                         }`}
                     >
                         <div className="flex justify-between items-start mb-1">
-                            <h3 className="font-medium">{voice.name}</h3>
-                            <div className="flex items-center gap-1 text-sm">
+                            <h3 className="font-medium truncate">{voice.name}</h3>
+                            <div className="flex items-center gap-1 text-sm flex-shrink-0 ml-2">
                                 <Star className="w-4 h-4 fill-current" />
                                 <span>{voice.rating}</span>
                             </div>
