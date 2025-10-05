@@ -31,16 +31,20 @@ export function VoiceDashboard({
         voices.length > 0 ? voices[0].id : null,
     );
     const [outputs, setOutputs] = useState(initialOutputs);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const selectedVoice = voices.find((v) => v.id === selectedVoiceId) || null;
 
     const handleGenerateSuccess = async () => {
         // Refresh outputs list using Server Action
+        setIsRefreshing(true);
         try {
             const refreshedOutputs = await getRecentOutputs();
             setOutputs(refreshedOutputs);
         } catch (error) {
             console.error("Failed to refresh outputs:", error);
+        } finally {
+            setIsRefreshing(false);
         }
     };
 
@@ -69,7 +73,7 @@ export function VoiceDashboard({
 
             {/* Right: Recent Outputs */}
             <div className="col-span-3">
-                <RecentOutputs outputs={outputs} />
+                <RecentOutputs outputs={outputs} isLoading={isRefreshing} />
             </div>
         </div>
     );

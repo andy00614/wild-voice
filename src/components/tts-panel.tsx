@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Volume2, Loader2 } from "lucide-react";
+import { Volume2, Loader2, Download } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { generateTTS } from "@/app/actions/tts";
 import type { Voice } from "@/modules/voices/schemas/voice.schema";
@@ -31,13 +31,14 @@ export function TTSPanel({ selectedVoice, onGenerateSuccess }: TTSPanelProps) {
         }
 
         setIsGenerating(true);
+        setAudioUrl(null); // 清空之前的音频
         try {
             const result = await generateTTS(text.trim(), selectedVoice.id);
 
             if (result.success && result.data) {
                 setAudioUrl(result.data.audioUrl);
                 toast.success("Speech generated successfully!");
-                onGenerateSuccess();
+                await onGenerateSuccess(); // 等待刷新完成
             } else {
                 toast.error(result.error || "Failed to generate speech");
             }
@@ -89,8 +90,35 @@ export function TTSPanel({ selectedVoice, onGenerateSuccess }: TTSPanelProps) {
 
             {audioUrl && (
                 <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <p className="text-sm mb-2">Audio generated successfully!</p>
-                    <audio controls className="w-full">
+                    <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm">Audio generated successfully!</p>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                                try {
+                                    const response = await fetch(audioUrl);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const link = document.createElement("a");
+                                    link.href = url;
+                                    link.download = `tts-${Date.now()}.mp3`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    window.URL.revokeObjectURL(url);
+                                    toast.success("Download started");
+                                } catch (error) {
+                                    toast.error("Download failed");
+                                    console.error("Download error:", error);
+                                }
+                            }}
+                        >
+                            <Download className="w-4 h-4 mr-1" />
+                            Download
+                        </Button>
+                    </div>
+                    <audio key={audioUrl} controls className="w-full">
                         <source src={audioUrl} type="audio/mpeg" />
                         Your browser does not support the audio element.
                     </audio>

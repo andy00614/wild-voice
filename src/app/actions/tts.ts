@@ -1,14 +1,14 @@
 "use server";
 
-import { getSession } from "@/modules/auth/utils/auth-utils";
-import { getDb } from "@/db";
-import { voicesSchema } from "@/modules/voices/schemas/voice.schema";
-import { outputsSchema } from "@/modules/outputs/schemas/output.schema";
-import { eq } from "drizzle-orm";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createFal } from "@ai-sdk/fal";
-import { generateSpeech } from "ai";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { experimental_generateSpeech as generateSpeech } from "ai";
+import { eq } from "drizzle-orm";
+import { getDb } from "@/db";
 import { uploadToR2 } from "@/lib/r2";
+import { getSession } from "@/modules/auth/utils/auth-utils";
+import { outputsSchema } from "@/modules/outputs/schemas/output.schema";
+import { voicesSchema } from "@/modules/voices/schemas/voice.schema";
 
 interface TTSResult {
     success: boolean;
@@ -22,7 +22,10 @@ interface TTSResult {
     error?: string;
 }
 
-export async function generateTTS(text: string, voiceId: number): Promise<TTSResult> {
+export async function generateTTS(
+    text: string,
+    voiceId: number,
+): Promise<TTSResult> {
     try {
         const session = await getSession();
         if (!session?.user) {
@@ -44,7 +47,10 @@ export async function generateTTS(text: string, voiceId: number): Promise<TTSRes
         }
 
         if (!voice.isPublic && voice.userId !== session.user.id) {
-            return { success: false, error: "You don't have access to this voice" };
+            return {
+                success: false,
+                error: "You don't have access to this voice",
+            };
         }
 
         // Create FAL provider with env API key
@@ -74,7 +80,10 @@ export async function generateTTS(text: string, voiceId: number): Promise<TTSRes
         const uploadResult = await uploadToR2(audioFile, "tts-outputs");
 
         if (!uploadResult.success) {
-            return { success: false, error: "Failed to upload audio to storage" };
+            return {
+                success: false,
+                error: "Failed to upload audio to storage",
+            };
         }
 
         // Save to outputs table
@@ -94,7 +103,7 @@ export async function generateTTS(text: string, voiceId: number): Promise<TTSRes
             success: true,
             data: {
                 id: output.id,
-                audioUrl: uploadResult.url,
+                audioUrl: uploadResult.url as string,
                 voice: voice.name,
                 text: text,
                 createdAt: output.createdAt,

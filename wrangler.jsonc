@@ -29,10 +29,10 @@
             "binding": "FILES",
             "experimental_remote": true
         }
-    ],
-    "ai": {
-        "binding": "AI"
-    }
+    ]
+    // "ai": {
+    //     "binding": "AI"
+    // }
     /**
      * Smart Placement
      * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
