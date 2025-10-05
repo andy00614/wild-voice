@@ -14,8 +14,8 @@ export const outputsSchema = sqliteTable("outputs", {
     inputText: text("input_text"),
     audioUrl: text("audio_url"),
     duration: integer("duration"),
-    createdAt: integer("created_at", { mode: "timestamp" })
-        .defaultNow()
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+        .$defaultFn(() => new Date())
         .notNull(),
 });
 

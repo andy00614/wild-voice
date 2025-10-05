@@ -120,3 +120,160 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom compact styles for react-h5-audio-player */
+.rhap_container {
+  padding: 10px 12px !important;
+  box-shadow: none !important;
+  background-color: hsl(var(--muted)) !important;
+  border-radius: 0.5rem !important;
+}
+
+.rhap_main {
+  gap: 8px !important;
+}
+
+.rhap_progress-section {
+  gap: 6px !important;
+}
+
+.rhap_progress-container {
+  height: 5px !important;
+  margin: 0 !important;
+  background-color: #e5e5e5 !important;
+  border-radius: 4px !important;
+}
+
+.dark .rhap_progress-container {
+  background-color: #404040 !important;
+}
+
+.rhap_progress-bar {
+  height: 5px !important;
+  background-color: hsl(var(--primary)) !important;
+  border-radius: 4px !important;
+}
+
+.rhap_progress-indicator {
+  width: 12px !important;
+  height: 12px !important;
+  top: -4px !important;
+  background-color: #000000 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+.dark .rhap_progress-indicator {
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.rhap_download-progress {
+  background-color: #e5e5e5 !important;
+  border-radius: 4px !important;
+}
+
+.dark .rhap_download-progress {
+  background-color: #404040 !important;
+}
+
+.rhap_time {
+  font-size: 11px !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.rhap_controls-section {
+  gap: 6px !important;
+  margin: 0 !important;
+}
+
+.rhap_main-controls {
+  gap: 6px !important;
+}
+
+.rhap_main-controls button {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 16px !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.rhap_volume-container {
+  gap: 6px !important;
+}
+
+.rhap_volume-button {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 16px !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.rhap_volume-bar-area {
+  width: 50px !important;
+}
+
+.rhap_volume-bar {
+  height: 4px !important;
+  background-color: #e5e5e5 !important;
+  border-radius: 4px !important;
+}
+
+.dark .rhap_volume-bar {
+  background-color: #404040 !important;
+}
+
+.rhap_volume-indicator {
+  width: 10px !important;
+  height: 10px !important;
+  top: -3px !important;
+  background-color: #000000 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15) !important;
+}
+
+.dark .rhap_volume-indicator {
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Additional controls */
+.rhap_additional-controls {
+  gap: 4px !important;
+}
+
+.rhap_additional-controls button {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 14px !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.rhap_button-clear {
+  background-color: transparent !important;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* Firefox scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+}

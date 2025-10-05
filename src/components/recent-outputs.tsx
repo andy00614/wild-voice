@@ -1,12 +1,13 @@
 "use client";
 
+import { format, formatDistanceToNow, fromUnixTime } from "date-fns";
+import { Download, Loader2, Play, X } from "lucide-react";
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import AudioPlayer from "react-h5-audio-player";
+import { toast } from "react-hot-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Download, Loader2, X } from "lucide-react";
-import { toast } from "react-hot-toast";
-import AudioPlayer from "react-h5-audio-player";
+import { Card } from "@/components/ui/card";
 import "react-h5-audio-player/lib/styles.css";
 import type { Output } from "@/modules/outputs/schemas/output.schema";
 
@@ -21,15 +22,37 @@ interface RecentOutputsProps {
     isLoading?: boolean;
 }
 
-function formatTimeAgo(date: Date): string {
-    const now = new Date();
-    const diffInMs = now.getTime() - new Date(date).getTime();
-    const diffInMins = Math.floor(diffInMs / 60000);
+function formatTimeAgo(date: Date | string | number): string {
+    try {
+        let dateObj: Date;
 
-    if (diffInMins < 1) return "Just now";
-    if (diffInMins < 60) return `${diffInMins} min ago`;
-    if (diffInMins < 1440) return `${Math.floor(diffInMins / 60)} hour ago`;
-    return `${Math.floor(diffInMins / 1440)} day ago`;
+        if (typeof date === "number") {
+            dateObj = new Date(date);
+        } else if (typeof date === "string") {
+            dateObj = new Date(date);
+        } else {
+            dateObj = date;
+        }
+
+        const now = new Date();
+        const diffInMs = now.getTime() - dateObj.getTime();
+        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+        if (diffInDays < 7) {
+            const relativeTime = formatDistanceToNow(dateObj, {
+                addSuffix: true,
+            });
+            if (relativeTime.includes("less than a minute")) {
+                return "Just now";
+            }
+            return relativeTime;
+        }
+
+        return format(dateObj, "M/d HH:mm");
+    } catch (error) {
+        console.error("Error formatting date:", error, date);
+        return "Unknown time";
+    }
 }
 
 async function downloadAudio(url: string, filename: string) {
@@ -53,25 +76,39 @@ async function downloadAudio(url: string, filename: string) {
     }
 }
 
-export function RecentOutputs({ outputs, isLoading = false }: RecentOutputsProps) {
+export function RecentOutputs({
+    outputs,
+    isLoading = false,
+}: RecentOutputsProps) {
     const [playingId, setPlayingId] = useState<number | null>(null);
     const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
-    const handleDownload = async (outputId: number, audioUrl: string, text: string) => {
+    const handleDownload = async (
+        outputId: number,
+        audioUrl: string,
+        text: string,
+    ) => {
         setDownloadingId(outputId);
-        const filename = `tts-${text.substring(0, 20).replace(/[^a-z0-9]/gi, '_')}-${Date.now()}.mp3`;
+        const filename = `tts-${text.substring(0, 20).replace(/[^a-z0-9]/gi, "_")}-${Date.now()}.mp3`;
         await downloadAudio(audioUrl, filename);
         setDownloadingId(null);
     };
 
+    console.log(outputs);
+
     return (
-        <Card className="p-4">
-            <div className="flex justify-between items-center mb-4">
+        <Card className="p-4 flex flex-col h-full">
+            <div className="flex justify-between items-center mb-4 flex-shrink-0">
                 <h2 className="text-lg font-semibold">Recent Outputs</h2>
-                {isLoading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                {isLoading && (
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                )}
             </div>
 
-            <div className="space-y-3">
+            <div
+                className="space-y-3 overflow-y-auto flex-1 pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
+                style={{ maxHeight: "500px" }}
+            >
                 {outputs.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">
                         {isLoading ? "Loading..." : "No outputs yet"}
@@ -80,7 +117,13 @@ export function RecentOutputs({ outputs, isLoading = false }: RecentOutputsProps
                     outputs.map((output) => (
                         <div key={output.id} className="p-3 border rounded-lg">
                             <div className="flex justify-between items-start mb-2">
-                                <Badge variant={output.type === "TTS" ? "default" : "secondary"}>
+                                <Badge
+                                    variant={
+                                        output.type === "TTS"
+                                            ? "default"
+                                            : "secondary"
+                                    }
+                                >
                                     {output.type}
                                 </Badge>
                                 <span className="text-xs text-muted-foreground">
@@ -95,7 +138,8 @@ export function RecentOutputs({ outputs, isLoading = false }: RecentOutputsProps
                             {output.voice && (
                                 <p className="text-xs text-muted-foreground mb-2">
                                     Voice: {output.voice.name}
-                                    {output.duration && ` • Duration: ${output.duration}s`}
+                                    {output.duration &&
+                                        ` • Duration: ${output.duration}s`}
                                 </p>
                             )}
 
@@ -106,7 +150,9 @@ export function RecentOutputs({ outputs, isLoading = false }: RecentOutputsProps
                                             <AudioPlayer
                                                 src={output.audioUrl}
                                                 autoPlay
-                                                onEnded={() => setPlayingId(null)}
+                                                onEnded={() =>
+                                                    setPlayingId(null)
+                                                }
                                                 showJumpControls={false}
                                                 customAdditionalControls={[]}
                                                 layout="horizontal-reverse"
@@ -115,7 +161,9 @@ export function RecentOutputs({ outputs, isLoading = false }: RecentOutputsProps
                                                 size="sm"
                                                 variant="outline"
                                                 className="w-full"
-                                                onClick={() => setPlayingId(null)}
+                                                onClick={() =>
+                                                    setPlayingId(null)
+                                                }
                                             >
                                                 <X className="w-3 h-3 mr-1" />
                                                 Close
@@ -127,7 +175,9 @@ export function RecentOutputs({ outputs, isLoading = false }: RecentOutputsProps
                                                 size="sm"
                                                 variant="outline"
                                                 className="flex-1"
-                                                onClick={() => setPlayingId(output.id)}
+                                                onClick={() =>
+                                                    setPlayingId(output.id)
+                                                }
                                             >
                                                 <Play className="w-3 h-3 mr-1" />
                                                 Play
@@ -135,8 +185,17 @@ export function RecentOutputs({ outputs, isLoading = false }: RecentOutputsProps
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                disabled={downloadingId === output.id}
-                                                onClick={() => handleDownload(output.id, output.audioUrl!, output.inputText || "audio")}
+                                                disabled={
+                                                    downloadingId === output.id
+                                                }
+                                                onClick={() =>
+                                                    handleDownload(
+                                                        output.id,
+                                                        output.audioUrl!,
+                                                        output.inputText ||
+                                                            "audio",
+                                                    )
+                                                }
                                             >
                                                 {downloadingId === output.id ? (
                                                     <Loader2 className="w-3 h-3 animate-spin" />
