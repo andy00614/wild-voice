@@ -26,7 +26,8 @@
     "r2_buckets": [
         {
             "bucket_name": "wild-voice-files",
-            "binding": "FILES"
+            "binding": "FILES",
+            "experimental_remote": true
         }
     ],
     "ai": {

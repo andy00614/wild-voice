@@ -1,0 +1,62 @@
+@baseUrl = http://localhost:3000
+@sessionToken = CJaudL7s3LolMcmx2Lf7ahRQuCbSO2VR.AsPLycqoTSmSm38Sf5FleC1K1a0YTiYwZvloyP6h6OU%3D
+
+### 测试：获取声音列表
+GET {{baseUrl}}/api/voices
+Cookie: better-auth.session_token={{sessionToken}}
+
+
+### 测试：创建公共声音
+POST {{baseUrl}}/api/voices
+Cookie: better-auth.session_token={{sessionToken}}
+Content-Type: application/json
+
+{
+  "name": "Donald Trump",
+  "category": "Celebrity",
+  "falVoiceId": "trump-v1",
+  "rating": 5,
+  "isPublic": true
+}
+
+### 测试：创建私有声音
+POST {{baseUrl}}/api/voices
+Cookie: better-auth.session_token={{sessionToken}}
+Content-Type: application/json
+
+{
+  "name": "My Voice",
+  "category": "Personal",
+  "falVoiceId": "custom-voice-123",
+  "rating": 4,
+  "isPublic": false
+}
+
+
+
+### ____________________________
+
+### 测试：TTS - 生成语音
+POST {{baseUrl}}/api/tts
+Cookie: better-auth.session_token={{sessionToken}}
+Content-Type: application/json
+
+{
+  "text": "Hello, this is a test of the text to speech system!",
+  "voiceId": 1,
+  "speed": 1.0,
+  "pitch": 0
+}
+
+### 测试：TTS - 带情绪
+POST {{baseUrl}}/api/tts
+Cookie: better-auth.session_token={{sessionToken}}
+Content-Type: application/json
+
+{
+  "text": "I am so happy to meet you!",
+  "voiceId": 1,
+  "speed": 1.2,
+  "pitch": 2,
+  "emotion": "happy"
+}

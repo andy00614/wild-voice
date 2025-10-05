@@ -43,7 +43,8 @@ export async function uploadToR2(
             };
         }
 
-        // Return public URL of R2 (should be using custom domain)
+        // 使用 R2 公共 URL
+        // 注意：启用了 experimental_remote 后，本地开发也会上传到真实 R2
         const publicUrl = `${env.CLOUDFLARE_R2_URL}/${key}`;
 
         return {
