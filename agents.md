@@ -331,6 +331,128 @@ AI:
 
 ---
 
+## 🔧 技术规范与最佳实践
+
+### 类型定义规范
+**核心原则: 引用已定义的类型,避免重复定义**
+
+```typescript
+// ❌ 错误: 自己定义重复的类型
+interface Voice {
+    id: number;
+    name: string;
+    category: string | null;
+    // ...
+}
+
+// ✅ 正确: 引用 schema 定义的类型
+import type { Voice } from "@/modules/voices/schemas/voice.schema";
+```
+
+**具体规则:**
+1. 使用 Drizzle schema 的类型推断
+   ```typescript
+   // 在 schema 文件中
+   export type Voice = typeof voicesSchema.$inferSelect;
+   export type NewVoice = typeof voicesSchema.$inferInsert;
+
+   // 在组件中引用
+   import type { Voice } from "@/modules/voices/schemas/voice.schema";
+   ```
+
+2. 对于第三方库,引用其导出的类型
+   ```typescript
+   // ✅ 正确
+   import type { Session } from "better-auth/types";
+
+   // ❌ 错误: 自己定义
+   interface Session { ... }
+   ```
+
+3. 对于联合查询等特殊情况,可以扩展基础类型
+   ```typescript
+   // ✅ 正确: 扩展已有类型
+   interface OutputWithVoice extends Output {
+       voice: { name: string } | null;
+   }
+   ```
+
+### 样式规范
+**核心原则: 使用默认主题颜色,保持代码简洁**
+
+```tsx
+// ❌ 错误: 硬编码颜色值
+<div className="bg-purple-600 text-white">...</div>
+<p className="text-gray-500">...</p>
+
+// ✅ 正确: 使用语义化 token
+<div className="bg-primary text-primary-foreground">...</div>
+<p className="text-muted-foreground">...</p>
+```
+
+**shadcn/ui 语义化 tokens:**
+- `bg-muted` - 柔和的背景色
+- `text-muted-foreground` - 次要文本颜色
+- `bg-accent` - 强调背景色
+- `bg-primary` - 主色背景
+- `text-primary-foreground` - 主色文本
+- `border` - 默认边框颜色
+
+### Server Actions 优先原则
+**核心原则: 数据提交操作优先使用 Server Actions**
+
+```typescript
+// ❌ 旧方式: API Route + fetch
+// src/app/api/tts/route.ts
+export async function POST(request: Request) { ... }
+
+// 客户端组件
+const response = await fetch("/api/tts", {
+    method: "POST",
+    body: JSON.stringify(data)
+});
+
+// ✅ 新方式: Server Actions
+// src/app/actions/tts.ts
+"use server";
+export async function generateTTS(text: string, voiceId: number) { ... }
+
+// 客户端组件
+import { generateTTS } from "@/app/actions/tts";
+const result = await generateTTS(text, voiceId);
+```
+
+**优势:**
+- 类型安全(参数和返回值都有类型推断)
+- 减少样板代码
+- 自动处理序列化
+- 更好的错误处理
+
+### 代码组织规范
+
+**目录结构:**
+```
+src/
+├── app/
+│   ├── actions/          # Server Actions
+│   │   └── tts.ts
+│   ├── api/             # API Routes (仅用于 webhooks 等特殊场景)
+│   └── dashboard/       # 页面
+├── components/          # 共享 UI 组件
+│   └── ui/             # shadcn/ui 组件
+└── modules/            # 功能模块
+    └── voices/
+        └── schemas/    # 数据库 schema 和类型定义
+```
+
+**命名约定:**
+- 组件文件: `kebab-case.tsx` (例: `voice-library.tsx`)
+- Server Actions: `kebab-case.ts` (例: `generate-tts.ts`)
+- Schema 文件: `*.schema.ts` (例: `voice.schema.ts`)
+- 类型导出: `PascalCase` (例: `Voice`, `Output`)
+
+---
+
 ## 📋 完整工作流程示例
 
 ### 场景: 实现新功能 "TTS 语音合成"
