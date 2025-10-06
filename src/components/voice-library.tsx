@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, Star } from "lucide-react";
 import type { Voice } from "@/modules/voices/schemas/voice.schema";
+import { VoiceCloneDialog } from "./voice-clone-dialog/index";
 
 interface VoiceLibraryProps {
     voices: Voice[];
@@ -13,11 +15,13 @@ interface VoiceLibraryProps {
 }
 
 export function VoiceLibrary({ voices, selectedVoiceId, onVoiceSelect }: VoiceLibraryProps) {
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
     return (
         <Card className="p-4">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Voice Library</h2>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" onClick={() => setIsDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-1" />
                     Create
                 </Button>
@@ -50,6 +54,8 @@ export function VoiceLibrary({ voices, selectedVoiceId, onVoiceSelect }: VoiceLi
                     </div>
                 ))}
             </div>
+
+            <VoiceCloneDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
         </Card>
     );
 }
