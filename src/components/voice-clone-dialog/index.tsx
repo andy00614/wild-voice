@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -59,15 +60,22 @@ export function VoiceCloneDialog({
         }, 100);
     };
 
+    const handleResetRecording = () => {
+        resetRecording();
+        setRecordedPreview(null); // Clear preview when resetting
+    };
+
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await handleSubmit(recordedBlob);
     };
 
-    // Update preview when recording changes
-    if (recordedBlob && !audioPreview) {
-        setRecordedPreview(recordedBlob);
-    }
+    // Update preview when recording blob changes
+    useEffect(() => {
+        if (recordedBlob) {
+            setRecordedPreview(recordedBlob);
+        }
+    }, [recordedBlob, setRecordedPreview]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -97,7 +105,7 @@ export function VoiceCloneDialog({
                     formatTime={formatTime}
                     onStartRecording={handleStartRecording}
                     onStopRecording={stopRecording}
-                    onResetRecording={resetRecording}
+                    onResetRecording={handleResetRecording}
                     onSubmit={onSubmit}
                     onCancel={() => onOpenChange(false)}
                 />

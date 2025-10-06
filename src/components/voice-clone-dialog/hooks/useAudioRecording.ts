@@ -66,10 +66,10 @@ export function useAudioRecording() {
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunksRef.current, {
+                const audioBlob = new Blob(audioChunksRef.current, {
                     type: "audio/webm",
                 });
-                setRecordedBlob(blob);
+                setRecordedBlob(audioBlob);
                 stream.getTracks().forEach((track) => track.stop());
             };
 
@@ -88,16 +88,21 @@ export function useAudioRecording() {
     // Stop recording
     const stopRecording = () => {
         if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.stop();
-            setIsRecording(false);
-
+            // Stop the timer first
             if (recordingTimerRef.current) {
                 clearInterval(recordingTimerRef.current);
+                recordingTimerRef.current = null;
             }
+
+            // Stop the media recorder (this triggers onstop callback)
+            mediaRecorderRef.current.stop();
+
+            // Set recording to false
+            setIsRecording(false);
         }
     };
 
-    // Reset recording
+    // Reset recording (also triggers preview refresh)
     const resetRecording = () => {
         setRecordedBlob(null);
         setRecordingDuration(0);

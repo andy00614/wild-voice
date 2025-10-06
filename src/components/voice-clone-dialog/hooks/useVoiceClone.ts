@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { cloneVoice } from "@/app/actions/voice-clone";
 import { validateAudioFile } from "../utils/file-validation";
@@ -36,15 +36,20 @@ export function useVoiceClone(onSuccess: () => void) {
         setAudioPreview(URL.createObjectURL(file));
     };
 
-    // Set recorded audio preview
-    const setRecordedPreview = (blob: Blob | null) => {
-        if (blob) {
-            const url = URL.createObjectURL(blob);
-            setAudioPreview(url);
-        } else {
-            setAudioPreview(null);
-        }
-    };
+    // Set recorded audio preview (cleans up old preview first)
+    const setRecordedPreview = useCallback((blob: Blob | null) => {
+        setAudioPreview((prevPreview) => {
+            // Clean up old preview URL
+            if (prevPreview) {
+                URL.revokeObjectURL(prevPreview);
+            }
+
+            if (blob) {
+                return URL.createObjectURL(blob);
+            }
+            return null;
+        });
+    }, []);
 
     // Form submission
     const handleSubmit = async (recordedBlob: Blob | null) => {

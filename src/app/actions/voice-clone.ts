@@ -44,7 +44,12 @@ export async function cloneVoice(
             "audio/webm",
         ];
 
-        console.log(audioFile.type);
+        console.log("Audio file details:", {
+            name: audioFile.name,
+            type: audioFile.type,
+            size: audioFile.size,
+        });
+
         if (!validTypes.includes(audioFile.type)) {
             return { success: false, error: "Invalid audio format" };
         }

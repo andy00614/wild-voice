@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getRecentOutputs } from "@/app/actions/outputs";
 import type { Output } from "@/modules/outputs/schemas/output.schema";
 import type { Voice } from "@/modules/voices/schemas/voice.schema";
@@ -26,7 +26,11 @@ export function VoiceDashboard({
     outputs: initialOutputs,
 }: VoiceDashboardProps) {
     const searchParams = useSearchParams();
-    const mode = searchParams.get("mode") || "tts";
+    const [mode, setMode] = useState("tts");
+
+    useEffect(() => {
+        setMode(searchParams.get("mode") || "tts");
+    }, [searchParams]);
     const [selectedVoiceId, setSelectedVoiceId] = useState<number | null>(
         voices.length > 0 ? voices[0].id : null,
     );

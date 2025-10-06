@@ -48,54 +48,56 @@ export function RecordingTab({
                 )}
 
                 {/* Recording state */}
-                {isRecording && readingPrompt && (
+                {isRecording && (
                     <div>
                         {/* Reading prompt */}
-                        <div className="bg-primary/10 rounded-lg p-4 mb-4 space-y-3">
-                            <p className="text-xs text-muted-foreground mb-3">
-                                Read the following slowly and clearly:
-                            </p>
+                        {readingPrompt && (
+                            <div className="bg-primary/10 rounded-lg p-4 mb-4 space-y-3">
+                                <p className="text-xs text-muted-foreground mb-3">
+                                    Read the following slowly and clearly:
+                                </p>
 
-                            {/* Numbers */}
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                                    <Hash className="w-3 h-3" />
-                                    <span>Numbers:</span>
+                                {/* Numbers */}
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                                        <Hash className="w-3 h-3" />
+                                        <span>Numbers:</span>
+                                    </div>
+                                    <div className="flex gap-2 justify-center items-center flex-wrap">
+                                        {readingPrompt.numbers.map((num, idx) => (
+                                            <span
+                                                key={idx}
+                                                className="text-2xl font-bold text-primary"
+                                            >
+                                                {num}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="flex gap-2 justify-center items-center flex-wrap">
-                                    {readingPrompt.numbers.map((num, idx) => (
-                                        <span
-                                            key={idx}
-                                            className="text-2xl font-bold text-primary"
-                                        >
-                                            {num}
-                                        </span>
-                                    ))}
+
+                                {/* Date */}
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                                        <Calendar className="w-3 h-3" />
+                                        <span>Date:</span>
+                                    </div>
+                                    <div className="text-xl font-semibold text-primary">
+                                        {readingPrompt.date}
+                                    </div>
+                                </div>
+
+                                {/* Phone Number */}
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                                        <Phone className="w-3 h-3" />
+                                        <span>Phone:</span>
+                                    </div>
+                                    <div className="text-xl font-semibold text-primary font-mono">
+                                        {readingPrompt.phoneNumber}
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Date */}
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                                    <Calendar className="w-3 h-3" />
-                                    <span>Date:</span>
-                                </div>
-                                <div className="text-xl font-semibold text-primary">
-                                    {readingPrompt.date}
-                                </div>
-                            </div>
-
-                            {/* Phone Number */}
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                                    <Phone className="w-3 h-3" />
-                                    <span>Phone:</span>
-                                </div>
-                                <div className="text-xl font-semibold text-primary font-mono">
-                                    {readingPrompt.phoneNumber}
-                                </div>
-                            </div>
-                        </div>
+                        )}
 
                         <div className="flex items-center justify-center mb-4">
                             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-2" />
@@ -118,7 +120,7 @@ export function RecordingTab({
                 )}
 
                 {/* Recorded state */}
-                {recordedBlob && (
+                {!isRecording && recordedBlob && (
                     <div>
                         <p className="text-sm text-muted-foreground mb-2">
                             Duration: {formatTime(recordingDuration)}
