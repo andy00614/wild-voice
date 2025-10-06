@@ -30,7 +30,7 @@ export function FileUploadTab({
                     {audioFile ? audioFile.name : "Click to upload audio file"}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                    Supports MP3, WAV, OGG, M4A (at least 10 seconds)
+                    Supports all audio formats (at least 10 seconds). Will be converted to MP3 automatically.
                 </p>
             </div>
             <input

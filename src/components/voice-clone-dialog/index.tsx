@@ -37,6 +37,7 @@ export function VoiceCloneDialog({
         recordedBlob,
         recordingDuration,
         readingPrompt,
+        isConverting,
         formatTime,
         generateReadingPrompt,
         startRecording,
@@ -83,8 +84,7 @@ export function VoiceCloneDialog({
                 <DialogHeader>
                     <DialogTitle>Clone Voice</DialogTitle>
                     <DialogDescription>
-                        Upload or record at least 10 seconds of audio sample to
-                        clone
+                        Upload or record at least 10 seconds of audio to clone voice
                     </DialogDescription>
                 </DialogHeader>
 
@@ -99,6 +99,7 @@ export function VoiceCloneDialog({
                     error={error}
                     onFileChange={handleFileChange}
                     isRecording={isRecording}
+                    isConverting={isConverting}
                     recordedBlob={recordedBlob}
                     recordingDuration={recordingDuration}
                     readingPrompt={readingPrompt}

@@ -8,6 +8,7 @@ interface AudioSourceTabsProps {
     audioFile: File | null;
     onFileChange: (file: File | null) => void;
     isRecording: boolean;
+    isConverting: boolean;
     recordedBlob: Blob | null;
     recordingDuration: number;
     readingPrompt: ReadingPrompt | null;
@@ -22,6 +23,7 @@ export function AudioSourceTabs({
     audioFile,
     onFileChange,
     isRecording,
+    isConverting,
     recordedBlob,
     recordingDuration,
     readingPrompt,
@@ -51,6 +53,7 @@ export function AudioSourceTabs({
                 <TabsContent value="record">
                     <RecordingTab
                         isRecording={isRecording}
+                        isConverting={isConverting}
                         recordedBlob={recordedBlob}
                         recordingDuration={recordingDuration}
                         readingPrompt={readingPrompt}

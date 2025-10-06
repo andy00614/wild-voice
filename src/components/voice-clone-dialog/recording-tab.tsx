@@ -1,9 +1,10 @@
-import { Mic, Square, Calendar, Phone, Hash } from "lucide-react";
+import { Mic, Square, Calendar, Phone, Hash, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ReadingPrompt } from "./types";
 
 interface RecordingTabProps {
     isRecording: boolean;
+    isConverting: boolean;
     recordedBlob: Blob | null;
     recordingDuration: number;
     readingPrompt: ReadingPrompt | null;
@@ -16,6 +17,7 @@ interface RecordingTabProps {
 
 export function RecordingTab({
     isRecording,
+    isConverting,
     recordedBlob,
     recordingDuration,
     readingPrompt,
@@ -119,8 +121,18 @@ export function RecordingTab({
                     </div>
                 )}
 
+                {/* Converting state */}
+                {isConverting && (
+                    <div>
+                        <Loader2 className="mx-auto h-8 w-8 text-primary animate-spin mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                            Converting to MP3...
+                        </p>
+                    </div>
+                )}
+
                 {/* Recorded state */}
-                {!isRecording && recordedBlob && (
+                {!isRecording && !isConverting && recordedBlob && (
                     <div>
                         <p className="text-sm text-muted-foreground mb-2">
                             Duration: {formatTime(recordingDuration)}

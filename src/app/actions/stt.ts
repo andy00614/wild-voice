@@ -1,8 +1,7 @@
 "use server";
 
-import { createOpenAI } from "@ai-sdk/openai";
+import { fal } from "@fal-ai/client";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { experimental_transcribe as transcribe } from "ai";
 import { getDb } from "@/db";
 import { uploadToR2 } from "@/lib/r2";
 import { getSession } from "@/modules/auth/utils/auth-utils";
@@ -19,7 +18,9 @@ interface STTResult {
     error?: string;
 }
 
-export async function transcribeAudio(formData: FormData): Promise<STTResult> {
+export async function transcribeAudio(
+    formData: FormData,
+): Promise<STTResult> {
     console.log("=== transcribeAudio called ===");
 
     try {
@@ -37,14 +38,14 @@ export async function transcribeAudio(formData: FormData): Promise<STTResult> {
             return { success: false, error: "No audio file provided" };
         }
 
-        // Validate audio file type
+        // Validate audio file type (FAL Wizper supports: mp3, mp4, mpeg, mpga, m4a, wav, webm)
         const validTypes = [
             "audio/mp3",
             "audio/mpeg",
             "audio/wav",
-            "audio/ogg",
-            "audio/m4a",
             "audio/webm",
+            "audio/m4a",
+            "audio/mp4",
         ];
 
         console.log("STT audio file details:", {
@@ -54,7 +55,7 @@ export async function transcribeAudio(formData: FormData): Promise<STTResult> {
         });
 
         if (!validTypes.includes(audioFile.type)) {
-            return { success: false, error: "Invalid audio format" };
+            return { success: false, error: "Invalid audio format. Supported: MP3, WAV, WebM, M4A" };
         }
 
         const { env } = await getCloudflareContext();
@@ -63,51 +64,47 @@ export async function transcribeAudio(formData: FormData): Promise<STTResult> {
         console.log("Starting transcription process...");
 
         // Check if API key is configured
-        if (!env.OPENAI_API_KEY) {
-            console.error("OPENAI_API_KEY not configured");
-            return { success: false, error: "OpenAI API key not configured" };
+        if (!env.FAL_KEY) {
+            console.error("FAL_KEY not configured");
+            return { success: false, error: "FAL API key not configured" };
         }
 
         console.log("API key check passed");
 
-        // Upload audio to R2 first
-        console.log("Uploading to R2...");
+        // Configure FAL client
+        fal.config({
+            credentials: env.FAL_KEY,
+        });
+
+        // Transcribe using FAL Wizper API with direct file upload
+        console.log("Starting FAL transcription...");
+        console.log("Using direct file upload (FAL SDK will auto-upload)");
+
+        const result = await fal.subscribe("fal-ai/wizper", {
+            input: {
+                audio_url: audioFile, // SDK accepts File/Blob directly and auto-uploads
+            },
+            logs: true,
+            onQueueUpdate: (update: any) => {
+                console.log("Queue update:", update.status);
+            },
+        });
+
+        // Upload to R2 for storage (to save audio URL in database)
+        console.log("Uploading to R2 for storage...");
         const uploadResult = await uploadToR2(audioFile, "stt-inputs");
         if (!uploadResult.success || !uploadResult.url) {
-            console.error("R2 upload failed:", uploadResult);
-            return { success: false, error: "Failed to upload audio" };
+            console.warn("Failed to upload audio to R2, but transcription succeeded");
         }
-        console.log("R2 upload successful:", uploadResult.url);
-
-        // Read audio file as buffer
-        const audioBuffer = await audioFile.arrayBuffer();
-        console.log("Audio buffer size:", audioBuffer.byteLength);
-
-        // Create OpenAI provider with API key
-        const openai = createOpenAI({ apiKey: env.OPENAI_API_KEY });
-
-        // Transcribe using AI SDK with OpenAI Whisper
-        console.log("Starting OpenAI transcription...");
-
-        const transcriptionPromise = transcribe({
-            model: openai.transcription("whisper-1"),
-            audio: new Uint8Array(audioBuffer),
-        });
-
-        // Add timeout (30 seconds)
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(
-                () => reject(new Error("Transcription timeout after 30s")),
-                30000,
-            );
-        });
-
-        const result = (await Promise.race([
-            transcriptionPromise,
-            timeoutPromise,
-        ])) as Awaited<ReturnType<typeof transcribe>>;
 
         console.log("Transcription result:", result);
+
+        const transcriptionText = (result as any).text || (result as any).data?.text || "";
+
+        if (!transcriptionText) {
+            console.error("No transcription text found in result:", result);
+            return { success: false, error: "Failed to extract transcription text" };
+        }
 
         // Save to outputs table
         console.log("Saving to database...");
@@ -117,9 +114,9 @@ export async function transcribeAudio(formData: FormData): Promise<STTResult> {
                 userId: session.user.id,
                 type: "STT",
                 voiceId: null,
-                inputText: result.text,
-                audioUrl: uploadResult.url,
-                duration: result.durationInSeconds || 0,
+                inputText: transcriptionText,
+                audioUrl: uploadResult.url || null,
+                duration: 0,
             })
             .returning();
 
@@ -130,8 +127,8 @@ export async function transcribeAudio(formData: FormData): Promise<STTResult> {
             success: true,
             data: {
                 id: output.id,
-                text: result.text,
-                audioUrl: uploadResult.url as string,
+                text: transcriptionText,
+                audioUrl: (uploadResult.url as string) || "",
                 createdAt: output.createdAt,
             },
         };

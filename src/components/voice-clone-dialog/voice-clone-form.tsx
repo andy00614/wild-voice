@@ -17,6 +17,7 @@ interface VoiceCloneFormProps {
     error: string | null;
     onFileChange: (file: File | null) => void;
     isRecording: boolean;
+    isConverting: boolean;
     recordedBlob: Blob | null;
     recordingDuration: number;
     readingPrompt: ReadingPrompt | null;
@@ -39,6 +40,7 @@ export function VoiceCloneForm({
     error,
     onFileChange,
     isRecording,
+    isConverting,
     recordedBlob,
     recordingDuration,
     readingPrompt,
@@ -77,6 +79,7 @@ export function VoiceCloneForm({
                 audioFile={audioFile}
                 onFileChange={onFileChange}
                 isRecording={isRecording}
+                isConverting={isConverting}
                 recordedBlob={recordedBlob}
                 recordingDuration={recordingDuration}
                 readingPrompt={readingPrompt}

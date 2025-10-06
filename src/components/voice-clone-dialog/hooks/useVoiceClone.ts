@@ -72,10 +72,11 @@ export function useVoiceClone(onSuccess: () => void) {
             if (category) formData.append("category", category);
 
             if (recordedBlob) {
+                // recordedBlob is already MP3 (converted on client-side)
                 const recordedFile = new File(
                     [recordedBlob],
-                    `recording-${Date.now()}.webm`,
-                    { type: "audio/webm" }
+                    `recording-${Date.now()}.mp3`,
+                    { type: "audio/mp3" }
                 );
                 formData.append("audio", recordedFile);
             } else if (audioFile) {

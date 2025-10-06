@@ -1,11 +1,47 @@
-import { useState, useRef, useEffect } from "react";
+import {
+    BlobSource,
+    BufferTarget,
+    Conversion,
+    Input,
+    Mp3OutputFormat,
+    Output,
+    WebMInputFormat,
+} from "mediabunny";
+import { useEffect, useRef, useState } from "react";
 import type { ReadingPrompt } from "../types";
+
+// Convert WebM Blob to MP3 Blob using mediabunny (client-side only)
+async function convertWebMToMP3(webmBlob: Blob): Promise<Blob> {
+    const input = new Input({
+        source: new BlobSource(webmBlob),
+        formats: [new WebMInputFormat()],
+    });
+
+    const bufferTarget = new BufferTarget();
+    const output = new Output({
+        format: new Mp3OutputFormat(),
+        target: bufferTarget,
+    });
+
+    const conversion = await Conversion.init({ input, output });
+    await conversion.execute();
+
+    const arrayBuffer = bufferTarget.buffer;
+    if (!arrayBuffer) {
+        throw new Error("MP3 conversion failed: no output buffer");
+    }
+
+    return new Blob([arrayBuffer], { type: "audio/mp3" });
+}
 
 export function useAudioRecording() {
     const [isRecording, setIsRecording] = useState(false);
     const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
     const [recordingDuration, setRecordingDuration] = useState(0);
-    const [readingPrompt, setReadingPrompt] = useState<ReadingPrompt | null>(null);
+    const [readingPrompt, setReadingPrompt] = useState<ReadingPrompt | null>(
+        null,
+    );
+    const [isConverting, setIsConverting] = useState(false);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
@@ -24,7 +60,7 @@ export function useAudioRecording() {
     const generateReadingPrompt = () => {
         // Generate 5 random numbers (0-99)
         const numbers = Array.from({ length: 5 }, () =>
-            Math.floor(Math.random() * 100)
+            Math.floor(Math.random() * 100),
         );
 
         // Generate random date
@@ -35,8 +71,12 @@ export function useAudioRecording() {
 
         // Generate random phone number (format: XXX-XXXX-XXXX)
         const part1 = 130 + Math.floor(Math.random() * 70); // 130-199
-        const part2 = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
-        const part3 = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+        const part2 = Math.floor(Math.random() * 10000)
+            .toString()
+            .padStart(4, "0");
+        const part3 = Math.floor(Math.random() * 10000)
+            .toString()
+            .padStart(4, "0");
         const phoneNumber = `${part1}-${part2}-${part3}`;
 
         setReadingPrompt({ numbers, date, phoneNumber });
@@ -65,12 +105,24 @@ export function useAudioRecording() {
                 }
             };
 
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, {
-                    type: "audio/webm",
+            mediaRecorder.onstop = async () => {
+                const webmBlob = new Blob(audioChunksRef.current, {
+                    type: "audio/mp3",
                 });
-                setRecordedBlob(audioBlob);
                 stream.getTracks().forEach((track) => track.stop());
+
+                // Convert WebM to MP3 on client-side
+                setIsConverting(true);
+                try {
+                    const mp3Blob = await convertWebMToMP3(webmBlob);
+                    setRecordedBlob(mp3Blob);
+                } catch (error) {
+                    console.error("Failed to convert to MP3:", error);
+                    // Fallback to WebM if conversion fails
+                    setRecordedBlob(webmBlob);
+                } finally {
+                    setIsConverting(false);
+                }
             };
 
             mediaRecorder.start();
@@ -81,7 +133,9 @@ export function useAudioRecording() {
                 setRecordingDuration((prev) => prev + 1);
             }, 1000);
         } catch (err) {
-            throw new Error("Cannot access microphone. Please check permissions");
+            throw new Error(
+                "Cannot access microphone. Please check permissions",
+            );
         }
     };
 
@@ -114,6 +168,7 @@ export function useAudioRecording() {
         recordedBlob,
         recordingDuration,
         readingPrompt,
+        isConverting,
         formatTime,
         generateReadingPrompt,
         startRecording,
