@@ -5,6 +5,19 @@ const nextConfig: NextConfig = {
     images: {
         domains: ["lh3.googleusercontent.com"],
     },
+    webpack: (config, { isServer }) => {
+        // Ignore Node.js modules in browser bundles
+        if (!isServer) {
+            config.resolve.fallback = {
+                ...config.resolve.fallback,
+                worker_threads: false,
+                fs: false,
+                net: false,
+                tls: false,
+            };
+        }
+        return config;
+    },
 };
 
 // Only run during `next dev`, not during `next build`
