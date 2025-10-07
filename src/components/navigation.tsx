@@ -1,36 +1,37 @@
-import { CheckSquare, Home } from "lucide-react";
+import { LogOut, Mic } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import LogoutButton from "../modules/auth/components/logout-button";
+import LogoutButton from "@/modules/auth/components/logout-button";
+import { getSession } from "@/modules/auth/utils/auth-utils";
 
-export function Navigation() {
+export async function Navigation() {
+    const session = await getSession();
+
     return (
         <nav className="border-b bg-white sticky top-0 z-50">
             <div className="container mx-auto px-4 py-3">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center gap-3">
                         <Link
-                            href="/"
-                            className="text-xl font-bold text-gray-900"
+                            href="/dashboard"
+                            className="text-xl font-bold text-gray-900 flex items-center gap-2"
                         >
-                            Wild Voice
+                            <Mic className="h-5 w-5 text-primary" />
+                            WildVoice
                         </Link>
-                        <div className="items-center space-x-4 hidden md:flex">
-                            <Link href="/">
-                                <Button variant="ghost" size="sm">
-                                    <Home className="mr-2 h-4 w-4" />
-                                    Home
-                                </Button>
-                            </Link>
-                            <Link href="/todos">
-                                <Button variant="ghost" size="sm">
-                                    <CheckSquare className="mr-2 h-4 w-4" />
-                                    Todos
-                                </Button>
-                            </Link>
-                        </div>
+                        <span className="text-sm text-muted-foreground">
+                            Talk. Transform. Clone.
+                        </span>
                     </div>
-                    <LogoutButton />
+
+                    {session?.user && (
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm text-muted-foreground">
+                                {session.user.name}
+                            </span>
+                            <LogoutButton />
+                        </div>
+                    )}
                 </div>
             </div>
         </nav>

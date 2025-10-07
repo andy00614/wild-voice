@@ -1,10 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
-import {
-    convertWebMToMP3,
-    formatTime,
-    AudioRecorder,
-} from "@/lib/audio";
+import { useEffect, useRef, useState } from "react";
+import { AudioRecorder, convertWebMToMP3, formatTime } from "@/lib/audio";
 import type { ReadingPrompt } from "../types";
 
 export function useAudioRecording() {
