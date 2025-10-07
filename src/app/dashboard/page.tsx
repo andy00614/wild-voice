@@ -53,10 +53,6 @@ export default async function Page() {
     return (
         <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-6">
             {/* Header */}
-            <div className="text-center mb-6 sm:mb-8">
-                <h1 className="text-3xl sm:text-4xl font-bold mb-2">WildVoice</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Talk. Transform. Clone.</p>
-            </div>
 
             {/* Mode Tabs */}
             <div className="flex justify-center">

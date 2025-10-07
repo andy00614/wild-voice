@@ -15,9 +15,54 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Next.js Cloudflare App",
+    title: "WildVoice - AI Voice Cloning & Text-to-Speech",
     description:
-        "Full-stack Next.js application with Cloudflare Workers, D1 db, R2 storage, and Drizzle ORM.",
+        "Transform your voice with AI. Clone voices, generate speech from text, and create realistic voice overs with WildVoice. Talk. Transform. Clone.",
+    keywords: [
+        "AI voice cloning",
+        "text to speech",
+        "voice synthesis",
+        "TTS",
+        "voice generator",
+        "AI voice",
+        "voice cloning",
+        "speech synthesis",
+    ],
+    authors: [{ name: "WildVoice" }],
+    creator: "WildVoice",
+    publisher: "WildVoice",
+    openGraph: {
+        type: "website",
+        locale: "en_US",
+        url: "https://wildvoice.app",
+        title: "WildVoice - AI Voice Cloning & Text-to-Speech",
+        description:
+            "Transform your voice with AI. Clone voices, generate speech from text, and create realistic voice overs.",
+        siteName: "WildVoice",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "WildVoice - AI Voice Cloning & Text-to-Speech",
+        description:
+            "Transform your voice with AI. Clone voices, generate speech from text, and create realistic voice overs.",
+        creator: "@wildvoice",
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+        },
+    },
+    icons: {
+        icon: "/favicon.ico",
+        shortcut: "/favicon-16x16.png",
+        apple: "/apple-touch-icon.png",
+    },
 };
 
 export const dynamic = "force-dynamic";
@@ -29,6 +74,10 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+            <head>
+                <link rel="manifest" href="/manifest.json" />
+                <meta name="theme-color" content="#6366f1" />
+            </head>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 min-h-screen`}
             >
