@@ -31,7 +31,7 @@ export async function Navigation() {
 
                     {session?.user && (
                         <div className="flex items-center gap-3">
-                            <Image
+                            <img
                                 src={session.user.image || "/logo.svg"}
                                 alt="user"
                                 width={24}
