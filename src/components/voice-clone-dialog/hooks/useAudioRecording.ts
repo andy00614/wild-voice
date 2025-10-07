@@ -1,38 +1,11 @@
-import {
-    BlobSource,
-    BufferTarget,
-    Conversion,
-    Input,
-    Mp3OutputFormat,
-    Output,
-    WebMInputFormat,
-} from "mediabunny";
 import { useEffect, useRef, useState } from "react";
+import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
+import {
+    convertWebMToMP3,
+    formatTime,
+    AudioRecorder,
+} from "@/lib/audio";
 import type { ReadingPrompt } from "../types";
-
-// Convert WebM Blob to MP3 Blob using mediabunny (client-side only)
-async function convertWebMToMP3(webmBlob: Blob): Promise<Blob> {
-    const input = new Input({
-        source: new BlobSource(webmBlob),
-        formats: [new WebMInputFormat()],
-    });
-
-    const bufferTarget = new BufferTarget();
-    const output = new Output({
-        format: new Mp3OutputFormat(),
-        target: bufferTarget,
-    });
-
-    const conversion = await Conversion.init({ input, output });
-    await conversion.execute();
-
-    const arrayBuffer = bufferTarget.buffer;
-    if (!arrayBuffer) {
-        throw new Error("MP3 conversion failed: no output buffer");
-    }
-
-    return new Blob([arrayBuffer], { type: "audio/mp3" });
-}
 
 export function useAudioRecording() {
     const [isRecording, setIsRecording] = useState(false);
@@ -43,9 +16,13 @@ export function useAudioRecording() {
     );
     const [isConverting, setIsConverting] = useState(false);
 
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const audioChunksRef = useRef<Blob[]>([]);
-    const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const recorderRef = useRef<AudioRecorder | null>(null);
+    const recordingTimerRef = useRef<number | null>(null);
+
+    // Register MP3 encoder once
+    useEffect(() => {
+        registerMp3Encoder();
+    }, []);
 
     // Cleanup recording timer
     useEffect(() => {
@@ -82,54 +59,30 @@ export function useAudioRecording() {
         setReadingPrompt({ numbers, date, phoneNumber });
     };
 
-    // Format time
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
-    };
-
     // Start recording
     const startRecording = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
+            recorderRef.current = new AudioRecorder();
+
+            await recorderRef.current.start({
+                onStop: async (webmBlob) => {
+                    setIsConverting(true);
+                    try {
+                        const mp3Blob = await convertWebMToMP3(webmBlob);
+                        setRecordedBlob(mp3Blob);
+                    } catch (error) {
+                        console.error("Failed to convert to MP3:", error);
+                        setRecordedBlob(webmBlob);
+                    } finally {
+                        setIsConverting(false);
+                    }
+                },
             });
-            const mediaRecorder = new MediaRecorder(stream);
-            mediaRecorderRef.current = mediaRecorder;
-            audioChunksRef.current = [];
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                }
-            };
-
-            mediaRecorder.onstop = async () => {
-                const webmBlob = new Blob(audioChunksRef.current, {
-                    type: "audio/mp3",
-                });
-                stream.getTracks().forEach((track) => track.stop());
-
-                // Convert WebM to MP3 on client-side
-                setIsConverting(true);
-                try {
-                    const mp3Blob = await convertWebMToMP3(webmBlob);
-                    setRecordedBlob(mp3Blob);
-                } catch (error) {
-                    console.error("Failed to convert to MP3:", error);
-                    // Fallback to WebM if conversion fails
-                    setRecordedBlob(webmBlob);
-                } finally {
-                    setIsConverting(false);
-                }
-            };
-
-            mediaRecorder.start();
             setIsRecording(true);
             setRecordingDuration(0);
 
-            recordingTimerRef.current = setInterval(() => {
+            recordingTimerRef.current = window.setInterval(() => {
                 setRecordingDuration((prev) => prev + 1);
             }, 1000);
         } catch (err) {
@@ -141,17 +94,13 @@ export function useAudioRecording() {
 
     // Stop recording
     const stopRecording = () => {
-        if (mediaRecorderRef.current && isRecording) {
-            // Stop the timer first
+        if (recorderRef.current && isRecording) {
             if (recordingTimerRef.current) {
                 clearInterval(recordingTimerRef.current);
                 recordingTimerRef.current = null;
             }
 
-            // Stop the media recorder (this triggers onstop callback)
-            mediaRecorderRef.current.stop();
-
-            // Set recording to false
+            recorderRef.current.stop();
             setIsRecording(false);
         }
     };
