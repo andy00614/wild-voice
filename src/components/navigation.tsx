@@ -1,6 +1,5 @@
-import { LogOut, Mic } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import LogoutButton from "@/modules/auth/components/logout-button";
 import { getSession } from "@/modules/auth/utils/auth-utils";
 
@@ -16,7 +15,13 @@ export async function Navigation() {
                             href="/dashboard"
                             className="text-xl font-bold text-gray-900 flex items-center gap-2"
                         >
-                            <Mic className="h-5 w-5 text-primary" />
+                            <Image
+                                src="/logo.svg"
+                                alt="WildVoice"
+                                width={20}
+                                height={20}
+                                className="w-5 h-5"
+                            />
                             WildVoice
                         </Link>
                         <span className="text-sm text-muted-foreground">
