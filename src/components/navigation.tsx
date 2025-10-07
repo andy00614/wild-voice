@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import LogoutButton from "@/modules/auth/components/logout-button";
 import { getSession } from "@/modules/auth/utils/auth-utils";
 
@@ -31,6 +31,13 @@ export async function Navigation() {
 
                     {session?.user && (
                         <div className="flex items-center gap-3">
+                            <Image
+                                src={session.user.image || "/logo.svg"}
+                                alt="user"
+                                width={24}
+                                height={24}
+                                className="w-8  h-8 rounded-full"
+                            />
                             <span className="text-sm text-muted-foreground">
                                 {session.user.name}
                             </span>
