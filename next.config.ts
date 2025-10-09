@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         }
         return config;
     },
+    experimental: {
+        serverActions: {
+            bodySizeLimit: "10mb",
+        },
+    },
 };
 
 // Only run during `next dev`, not during `next build`
